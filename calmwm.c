@@ -232,8 +232,10 @@ void
 usage(void)
 {
 	extern char	*__progname;
-
-	(void)fprintf(stderr, "usage: %s [-nv] [-c file] [-d display]\n",
+	
+	FILE *fp = fopen("/dev/stderr", "w");
+	(void)fprintf(fp, "usage: %s [-nv] [-c file] [-d display]\n",
 	    __progname);
+	fclose(fp);
 	exit(1);
 }

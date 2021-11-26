@@ -75,6 +75,7 @@ size_t strlcpy(char *, const char *, size_t);
 #define CWM_DOWN		0x0002
 #define CWM_LEFT		0x0004
 #define CWM_RIGHT		0x0008
+#define CWM_CENTER  0x0010
 #define CWM_BIGAMOUNT		0x0010
 #define CWM_UP_BIG		(CWM_UP | CWM_BIGAMOUNT)
 #define CWM_DOWN_BIG		(CWM_DOWN | CWM_BIGAMOUNT)
@@ -190,6 +191,7 @@ struct client_ctx {
 	int			 stackingorder;
 	struct name_q		 nameq;
 	char			*name;
+	unsigned char *window_type; /* _NET_WM_WINDOW_TYPE */
 	char			*label;
 	char			*res_class; /* class hint */
 	char			*res_name; /* class hint */
@@ -434,6 +436,7 @@ void			 client_remove(struct client_ctx *);
 void			 client_resize(struct client_ctx *, int);
 void			 client_set_active(struct client_ctx *);
 void			 client_set_name(struct client_ctx *);
+void			 client_set_type(struct client_ctx *);
 void			 client_show(struct client_ctx *);
 int			 client_snapcalc(int, int, int, int, int);
 void			 client_toggle_hidden(struct client_ctx *);
@@ -503,6 +506,8 @@ void			 screen_updatestackingorder(struct screen_ctx *);
 
 void			 kbfunc_cwm_status(void *, struct cargs *);
 void			 kbfunc_ptrmove(void *, struct cargs *);
+void			 kbfunc_ptrcenter(void *, struct cargs *);
+void			 kbfunc_ptrbanish(void *, struct cargs *);
 void			 kbfunc_client_snap(void *, struct cargs *);
 void			 kbfunc_client_move(void *, struct cargs *);
 void			 kbfunc_client_resize(void *, struct cargs *);

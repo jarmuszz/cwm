@@ -1,3 +1,19 @@
+My fork of leahneukirchen's portable cwm.
+
+New additions:
+	* Window centring
+	* Hardcoded lemonbar (or xtbar) integration
+	* Fixed transparency of borders when using picom
+	* Modern defaults (look into conf.c)
+	* Config moved to XDG_COFIG_HOME/cwm/cwmrc
+	* Pointer centering
+	* Pointer banishing
+	* ":" As a prompt char
+
+Note that I make this fork only for my personal use.
+
+Original README:
+
 This is a port of OpenBSD's excellent cwm[0] to Linux and other Unices.
 
     cwm is a window manager for X11 which contains many features that

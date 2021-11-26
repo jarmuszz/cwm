@@ -57,16 +57,19 @@ static int cursor_binds[] = {
 	XC_bottom_right_corner,	/* CF_RESIZE */
 	XC_question_arrow,	/* CF_QUESTION */
 };
+
+/* Don't look at those colors,
+ * they're changed in cwmrc */
 static const char *color_binds[] = {
-	"#CCCCCC",		/* CWM_COLOR_BORDER_ACTIVE */
-	"#666666",		/* CWM_COLOR_BORDER_INACTIVE */
-	"#FC8814",		/* CWM_COLOR_BORDER_URGENCY */
+	"#BF4145",		/* CWM_COLOR_BORDER_ACTIVE */
+	"#0f0f0d",		/* CWM_COLOR_BORDER_INACTIVE */
+	"#d6d9d8",		/* CWM_COLOR_BORDER_URGENCY */
 	"blue",			/* CWM_COLOR_BORDER_GROUP */
 	"red",			/* CWM_COLOR_BORDER_UNGROUP */
-	"black",		/* CWM_COLOR_MENU_FG */
-	"white",		/* CWM_COLOR_MENU_BG */
-	"black",		/* CWM_COLOR_MENU_FONT */
-	"",			/* CWM_COLOR_MENU_FONT_SEL */
+	"#0f0f0d",		/* CWM_COLOR_MENU_FG */
+	"#0f0f0d",		/* CWM_COLOR_MENU_BG */
+	"#d6d9d8",		/* CWM_COLOR_MENU_FONT */
+	"black",			/* CWM_COLOR_MENU_FONT_SEL */
 };
 static const struct {
 	const char	*tag;
@@ -106,6 +109,7 @@ static const struct {
 	{ FUNC_CC(window-snap-down, client_snap, (CWM_DOWN)) },
 	{ FUNC_CC(window-snap-right, client_snap, (CWM_RIGHT)) },
 	{ FUNC_CC(window-snap-left, client_snap, (CWM_LEFT)) },
+	{ FUNC_CC(window-snap-center, client_snap, (CWM_CENTER)) },
 	{ FUNC_CC(window-snap-up-right, client_snap, (CWM_UP_RIGHT)) },
 	{ FUNC_CC(window-snap-up-left, client_snap, (CWM_UP_LEFT)) },
 	{ FUNC_CC(window-snap-down-right, client_snap, (CWM_DOWN_RIGHT)) },
@@ -176,6 +180,8 @@ static const struct {
 	{ FUNC_SC(pointer-move-down-big, ptrmove, (CWM_DOWN_BIG)) },
 	{ FUNC_SC(pointer-move-left-big, ptrmove, (CWM_LEFT_BIG)) },
 	{ FUNC_SC(pointer-move-right-big, ptrmove, (CWM_RIGHT_BIG)) },
+	{ FUNC_CC(pointer-move-center, ptrcenter, 0) },
+	{ FUNC_CC(pointer-banish, ptrbanish, 0) },
 
 	{ FUNC_SC(menu-cmd, menu_cmd, 0) },
 	{ FUNC_SC(menu-group, menu_group, 0) },
@@ -207,74 +213,106 @@ static const struct {
 	const char	*key;
 	const char	*func;
 } key_binds[] = {
-	{ "CM-Return",	"terminal" },
-	{ "CM-Delete",	"lock" },
-	{ "M-question",	"menu-exec" },
-	{ "CM-w",	"menu-exec-wm" },
-	{ "M-period",	"menu-ssh" },
-	{ "M-Return",	"window-hide" },
-	{ "M-Down",	"window-lower" },
-	{ "M-Up",	"window-raise" },
-	{ "M-slash",	"menu-window" },
-	{ "C-slash",	"menu-cmd" },
-	{ "M-Tab",	"window-cycle" },
-	{ "MS-Tab",	"window-rcycle" },
-	{ "CM-n",	"window-menu-label" },
-	{ "CM-x",	"window-close" },
-	{ "CM-a",	"group-toggle-all" },
-	{ "CM-0",	"group-toggle-all" },
-	{ "CM-1",	"group-toggle-1" },
-	{ "CM-2",	"group-toggle-2" },
-	{ "CM-3",	"group-toggle-3" },
-	{ "CM-4",	"group-toggle-4" },
-	{ "CM-5",	"group-toggle-5" },
-	{ "CM-6",	"group-toggle-6" },
-	{ "CM-7",	"group-toggle-7" },
-	{ "CM-8",	"group-toggle-8" },
-	{ "CM-9",	"group-toggle-9" },
-	{ "M-Right",	"group-cycle" },
-	{ "M-Left",	"group-rcycle" },
-	{ "CM-g",	"window-group" },
-	{ "CM-f",	"window-fullscreen" },
-	{ "CM-m",	"window-maximize" },
-	{ "CM-s",	"window-stick" },
-	{ "CM-equal",	"window-vmaximize" },
-	{ "CMS-equal",	"window-hmaximize" },
-	{ "CMS-f",	"window-freeze" },
-	{ "CMS-r",	"restart" },
-	{ "CMS-q",	"quit" },
-	{ "M-h",	"window-move-left" },
-	{ "M-j",	"window-move-down" },
-	{ "M-k",	"window-move-up" },
-	{ "M-l",	"window-move-right" },
-	{ "MS-h",	"window-move-left-big" },
-	{ "MS-j",	"window-move-down-big" },
-	{ "MS-k",	"window-move-up-big" },
-	{ "MS-l",	"window-move-right-big" },
-	{ "CM-h",	"window-resize-left" },
-	{ "CM-j",	"window-resize-down" },
-	{ "CM-k",	"window-resize-up" },
-	{ "CM-l",	"window-resize-right" },
-	{ "CMS-h",	"window-resize-left-big" },
-	{ "CMS-j",	"window-resize-down-big" },
-	{ "CMS-k",	"window-resize-up-big" },
-	{ "CMS-l",	"window-resize-right-big" },
+	/* Spawns */
+	{ "4-Return",		"terminal" }, 
+	{ "C4-Delete",	"lock" },
+	
+	/* Menus */
+	{ "4-d",				"menu-exec" },
+	{ "4-g",				"menu-group" },
+	{ "4-period",		"menu-ssh" },
+	{ "4S-slash",		"menu-cmd" },
+	{ "4-slash",		"menu-window" },
+
+	/* Window movement */
+	{ "4-h",				"window-move-left-big" },
+	{ "4-j",				"window-move-down-big" },
+	{ "4-k",				"window-move-up-big" },
+	{ "4-l",				"window-move-right-big" },
+	{ "C4-h",				"window-snap-left" },
+	{ "C4-j",				"window-snap-down" },
+	{ "C4-k",				"window-snap-up" },
+	{ "C4-l",				"window-snap-right" },
+	{ "4-c",				"window-snap-center" },
+
+	/* Window resizing */
+	{ "4S-h",				"window-resize-left" },
+	{ "4S-j",				"window-resize-down" },
+	{ "4S-k",				"window-resize-up" },
+	{ "4S-l",				"window-resize-right" },
+	{ "4-f",				"window-fullscreen" },
+	{ "4-m",				"window-maximize" },
+	{ "4-equal",		"window-vmaximize" },
+	{ "4S-equal",		"window-hmaximize" },
+
+	/* Window focus */
+	{ "4S-Return",	"window-hide" },
+	{ "4S-comma",		"window-lower" },
+	{ "4S-period",	"window-raise" },
+	{ "4-Tab",			"window-cycle" },
+	{ "4S-Tab",			"window-rcycle" },
+	{ "4S-x",				"window-close" },
+
+	/* Window/pointer misc. */
+	{ "4S-n",				"window-menu-label" },
+	{ "4S-f",				"window-freeze" },
+	{ "4-t",				"window-vtile" },
+	{ "4-s",				"window-group" },
+	{ "4-e",				"pointer-move-center" },
+	{ "4-w",				"pointer-banish" },
+
+	/* Groups */
+	{ "4-a",				"group-toggle-all" },
+	{ "4-0",				"group-only-all" },
+	{ "4-1",				"group-only-1" },
+	{ "4-2",				"group-only-2" },
+	{ "4-3",				"group-only-3" },
+	{ "4-4",				"group-only-4" },
+	{ "4-5",				"group-only-5" },
+	{ "4-6",				"group-only-6" },
+	{ "4-7",				"group-only-7" },
+	{ "4-8",				"group-only-8" },
+	{ "4-9",				"group-only-9" },
+	{ "4S-1",				"window-movetogroup-1" },
+	{ "4S-2",				"window-movetogroup-2" },
+	{ "4S-3",				"window-movetogroup-3" },
+	{ "4S-4",				"window-movetogroup-4" },
+	{ "4S-5",				"window-movetogroup-5" },
+	{ "4S-6",				"window-movetogroup-6" },
+	{ "4S-7",				"window-movetogroup-7" },
+	{ "4S-8",				"window-movetogroup-8" },
+	{ "4S-9",				"window-movetogroup-9" },
+	{ "C4-1",				"group-toggle-1" },
+	{ "C4-2",				"group-toggle-2" },
+	{ "C4-3",				"group-toggle-3" },
+	{ "C4-4",				"group-toggle-4" },
+	{ "C4-5",				"group-toggle-5" },
+	{ "C4-6",				"group-toggle-6" },
+	{ "C4-7",				"group-toggle-7" },
+	{ "C4-8",				"group-toggle-8" },
+	{ "C4-9",				"group-toggle-9" },
+	{ "4-Right",		"group-cycle" },
+	{ "4-Left",			"group-rcycle" },
+
+	/* CWM */
+	{ "C4S-r",			"restart" },
+	{ "C4S-q",			"quit" },
 },
 mouse_binds[] = {
-	{ "1",		"menu-window" },
-	{ "2",		"menu-group" },
-	{ "3",		"menu-cmd" },
-	{ "M-1",	"window-move" },
-	{ "CM-1",	"window-group" },
-	{ "M-2",	"window-resize" },
-	{ "M-3",	"window-lower" },
-	{ "CMS-3",	"window-hide" },
+	{ "1",			"menu-window" },
+	{ "2",			"menu-group" },
+	{ "3",			"menu-cmd" },
+	{ "4-1",		"window-move" },
+	{ "4S-1",		"window-group" },
+	{ "4-3",		"window-resize" },
+	{ "C4S-3",	"window-hide" },
 };
 
 void
 conf_init(struct conf *c)
 {
 	const char	*home;
+	const char	*conf_home;
 	struct passwd	*pw;
 	unsigned int	i;
 
@@ -318,7 +356,12 @@ conf_init(struct conf *c)
 		else
 			home = "/";
 	}
-	xasprintf(&c->conf_file, "%s/%s", home, ".cwmrc");
+
+	conf_home = getenv("XDG_CONFIG_HOME");
+	if ((conf_home == NULL) || (*home == '\0'))
+		conf_home = home;
+
+	xasprintf(&c->conf_file, "%s/%s", conf_home, "cwm/cwmrc");
 	xasprintf(&c->known_hosts, "%s/%s", home, ".ssh/known_hosts");
 }
 
@@ -489,18 +532,18 @@ conf_screen(struct screen_ctx *sc)
 	for (i = 0; i < nitems(color_binds); i++) {
 		if (i == CWM_COLOR_MENU_FONT_SEL && *Conf.color[i] == '\0') {
 			xu_xorcolor(sc->xftcolor[CWM_COLOR_MENU_BG],
-			    sc->xftcolor[CWM_COLOR_MENU_FG], &xc);
+					sc->xftcolor[CWM_COLOR_MENU_FG], &xc);
 			xu_xorcolor(sc->xftcolor[CWM_COLOR_MENU_FONT], xc, &xc);
 			if (!XftColorAllocValue(X_Dpy, sc->visual, sc->colormap,
-			    &xc.color, &sc->xftcolor[CWM_COLOR_MENU_FONT_SEL]))
+					&xc.color, &sc->xftcolor[CWM_COLOR_MENU_FONT_SEL]))
 				warnx("XftColorAllocValue: %s", Conf.color[i]);
 			break;
 		}
 		if (!XftColorAllocName(X_Dpy, sc->visual, sc->colormap,
-		    Conf.color[i], &sc->xftcolor[i])) {
+				Conf.color[i], &sc->xftcolor[i])) {
 			warnx("XftColorAllocName: %s", Conf.color[i]);
 			XftColorAllocName(X_Dpy, sc->visual, sc->colormap,
-			    color_binds[i], &sc->xftcolor[i]);
+					color_binds[i], &sc->xftcolor[i]);
 		}
 	}
 
@@ -523,7 +566,7 @@ conf_bind_mask(const char *name, unsigned int *mask)
 {
 	char		*dash;
 	const char	*ch;
-	unsigned int 	 i;
+	unsigned int	 i;
 
 	*mask = 0;
 	if ((dash = strchr(name, '-')) == NULL)
@@ -587,8 +630,8 @@ conf_unbind_key(struct conf *c, struct bind_ctx *unbind)
 
 	TAILQ_FOREACH_SAFE(key, &c->keybindq, entry, keynxt) {
 		if ((unbind == NULL) ||
-		    ((key->modmask == unbind->modmask) &&
-		     (key->press.keysym == unbind->press.keysym))) {
+				((key->modmask == unbind->modmask) &&
+				 (key->press.keysym == unbind->press.keysym))) {
 			TAILQ_REMOVE(&c->keybindq, key, entry);
 			free(key->cargs->cmd);
 			free(key->cargs);
@@ -648,8 +691,8 @@ conf_unbind_mouse(struct conf *c, struct bind_ctx *unbind)
 
 	TAILQ_FOREACH_SAFE(mb, &c->mousebindq, entry, mbnxt) {
 		if ((unbind == NULL) || 
-		    ((mb->modmask == unbind->modmask) &&
-		     (mb->press.button == unbind->press.button))) {
+				((mb->modmask == unbind->modmask) &&
+				 (mb->press.button == unbind->press.button))) {
 			TAILQ_REMOVE(&c->mousebindq, mb, entry);
 			free(mb->cargs->cmd);
 			free(mb->cargs);
@@ -670,12 +713,12 @@ conf_grab_kbd(Window win)
 	TAILQ_FOREACH(kb, &Conf.keybindq, entry) {
 		kc = XKeysymToKeycode(X_Dpy, kb->press.keysym);
 		if ((XkbKeycodeToKeysym(X_Dpy, kc, 0, 0) != kb->press.keysym) &&
-		    (XkbKeycodeToKeysym(X_Dpy, kc, 0, 1) == kb->press.keysym))
+				(XkbKeycodeToKeysym(X_Dpy, kc, 0, 1) == kb->press.keysym))
 			kb->modmask |= ShiftMask;
 
 		for (i = 0; i < nitems(ignore_mods); i++)
 			XGrabKey(X_Dpy, kc, (kb->modmask | ignore_mods[i]), win,
-			    True, GrabModeAsync, GrabModeAsync);
+					True, GrabModeAsync, GrabModeAsync);
 	}
 }
 
@@ -692,9 +735,9 @@ conf_grab_mouse(Window win)
 			continue;
 		for (i = 0; i < nitems(ignore_mods); i++) {
 			XGrabButton(X_Dpy, mb->press.button,
-			    (mb->modmask | ignore_mods[i]), win, False,
-			    BUTTONMASK, GrabModeAsync, GrabModeSync,
-			    None, None);
+					(mb->modmask | ignore_mods[i]), win, False,
+					BUTTONMASK, GrabModeAsync, GrabModeSync,
+					None, None);
 		}
 	}
 }

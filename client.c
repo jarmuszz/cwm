@@ -72,6 +72,7 @@ client_init(Window win, struct screen_ctx *sc)
 	cc->flags = 0;
 	cc->stackingorder = 0;
 	cc->initial_state = 0;
+	cc->window_type = 0;
 	memset(&cc->hint, 0, sizeof(cc->hint));
 	TAILQ_INIT(&cc->nameq);
 
@@ -99,6 +100,7 @@ client_init(Window win, struct screen_ctx *sc)
 	cc->dim.h = (cc->geom.h - cc->hint.baseh) / cc->hint.inch;
 	cc->ptr.x = cc->geom.w / 2;
 	cc->ptr.y = cc->geom.h / 2;
+
 
 	if (wattr.map_state != IsViewable) {
 		client_placement(cc);
@@ -144,6 +146,13 @@ client_init(Window win, struct screen_ctx *sc)
 out:
 	XSync(X_Dpy, False);
 	XUngrabServer(X_Dpy);
+
+	if (strcmp(cc->name, "bar") == 0)
+		client_toggle_freeze(cc);
+	else if (strcmp(cc->name, "xtbar") == 0) {
+		client_toggle_freeze(cc);
+		client_toggle_sticky(cc);
+	}
 
 	return cc;
 }
@@ -594,6 +603,9 @@ client_draw_border(struct client_ctx *cc)
 
 	if (cc->flags & CLIENT_URGENCY)
 		pixel = sc->xftcolor[CWM_COLOR_BORDER_URGENCY].pixel;
+
+	/* Setting alpha fixes transparent borders in picom */
+	pixel |= 0xff << 24;
 
 	XSetWindowBorderWidth(X_Dpy, cc->win, (unsigned int)cc->bwidth);
 	XSetWindowBorder(X_Dpy, cc->win, pixel);

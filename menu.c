@@ -34,8 +34,8 @@
 
 #include "calmwm.h"
 
-#define PROMPT_SCHAR	"\xc2\xbb"
-#define PROMPT_ECHAR	"\xc2\xab"
+#define PROMPT_SCHAR ": "
+#define PROMPT_ECHAR ""
 
 #define MENUMASK 	(MOUSEMASK | ButtonMotionMask | KeyPressMask | \
 			 ExposureMask)

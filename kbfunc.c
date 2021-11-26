@@ -1,3 +1,4 @@
+// vim: set noexpandtab
 /*
  * calmwm - the calm window manager
  *
@@ -89,6 +90,22 @@ kbfunc_ptrmove(void *ctx, struct cargs *cargs)
 
 	xu_ptr_get(sc->rootwin, &x, &y);
 	xu_ptr_set(sc->rootwin, x + mx, y + my);
+}
+
+void
+kbfunc_ptrcenter(void *ctx, struct cargs *dummy)
+{
+	struct client_ctx	*cc = ctx;
+	xu_ptr_set(cc->win,
+			cc->geom.w / 2, cc->geom.h / 2);
+
+}
+
+void
+kbfunc_ptrbanish(void *ctx, struct cargs *dummy)
+{
+	struct client_ctx *cc = ctx;
+	xu_ptr_set(cc->win, cc->geom.w, cc->geom.h);
 }
 
 void
@@ -322,6 +339,11 @@ kbfunc_client_snap(void *ctx, struct cargs *cargs)
 			cc->geom.y = area.y + area.h - cc->geom.h -
 			    (cc->bwidth * 2);
 			flags &= ~CWM_DOWN;
+		}
+		if (flags & CWM_CENTER) {
+			cc->geom.y = (area.y + area.h - cc->geom.h) / 2 + cc->bwidth;
+			cc->geom.x = (area.x + area.w - cc->geom.w) / 2 - cc->bwidth;
+			flags &= ~CWM_CENTER;
 		}
 	}
 	client_move(cc);
